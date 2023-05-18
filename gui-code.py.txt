@@ -1,0 +1,74 @@
+from tkinter import Tk, Label, Button, OptionMenu, StringVar
+from PIL import ImageGrab
+import pyautogui
+from board import Board
+import time
+import random
+import copy
+
+# Constants
+LEFT = 570
+TOP = 200
+RIGHT = 1350
+BOTTOM = 875
+EMPTY = 0
+RED = 1
+BLUE = 2
+
+class GameGUI:
+    def __init__(self):
+        self.window = Tk()
+        self.window.title("Connect Four")
+        self.algorithm_var = StringVar(self.window)
+        self.difficulty_var = StringVar(self.window)
+        self.board = Board()
+        self.game_end = False
+
+        # Algorithm selection
+        algorithm_label = Label(self.window, text="Algorithm:")
+        algorithm_label.pack()
+        algorithms = ["Minimax"]
+        algorithm_menu = OptionMenu(self.window, self.algorithm_var, *algorithms)
+        algorithm_menu.pack()
+
+        # Difficulty level selection
+        difficulty_label = Label(self.window, text="Difficulty Level:")
+        difficulty_label.pack()
+        difficulty_levels = ["Easy", "Medium", "Hard"]
+        difficulty_menu = OptionMenu(self.window, self.difficulty_var, *difficulty_levels)
+        difficulty_menu.pack()
+
+        # Start game button
+        start_button = Button(self.window, text="Start Game", command=self.start_game)
+        start_button.pack()
+
+        self.window.mainloop()
+
+    def start_game(self):
+        algorithm = self.algorithm_var.get()
+        difficulty = self.difficulty_var.get()
+
+        if algorithm == "Minimax":
+            self.run_minimax(difficulty)
+
+    def run_minimax(self, difficulty):
+        depth = 4  # Default depth
+        if difficulty == "Easy":
+            depth = 2
+        elif difficulty == "Medium":
+            depth = 4
+        elif difficulty == "Hard":
+            depth = 6
+
+        time.sleep(2)
+        while not self.game_end:
+            (game_board, self.game_end) = self.board.get_game_grid()
+
+            # FOR DEBUG PURPOSES
+            self.board.print_grid(game_board)
+
+            if not self.game_end:
+                column, _ = minimax(self.board, depth=depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True)
+                self.board.select_column(column)
+
+            time.sleep(2)
